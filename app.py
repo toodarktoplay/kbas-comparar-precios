@@ -49,8 +49,13 @@ def extraer_shopify(url_coleccion):
         if not items:
             break
         for p in items:
-            precios = [limpiar_precio(v["price"]) for v in p.get("variants", []) if v.get("price")]
-            precios = [x for x in precios if x is not None]
+            precios = []
+            for v in p.get("variants", []):
+                if v.get("price"):
+                    try:
+                        precios.append(float(v["price"]))  # Shopify: "69.50" -> 69.5, directo
+                    except (ValueError, TypeError):
+                        pass
             if precios:
                 productos.append({"nombre": p.get("title"), "precio": min(precios)})
         time.sleep(0.5)
