@@ -19,6 +19,25 @@ HEADERS = {"User-Agent": "Mozilla/5.0 (compatible; KbasPriceCheck/1.0)"}
 PATRON_PRECIO = re.compile(r"(\d{1,4}[.,]\d{2})\s?€")
 
 
+def check_password():
+    """Pide contraseña antes de mostrar nada. Se guarda en Secrets."""
+    def password_entered():
+        if st.session_state.get("password") == st.secrets.get("dashboard_password"):
+            st.session_state["password_correct"] = True
+            del st.session_state["password"]
+        else:
+            st.session_state["password_correct"] = False
+
+    if st.session_state.get("password_correct"):
+        return True
+
+    st.title("Comparar precios de la competencia")
+    st.text_input("Contraseña", type="password", on_change=password_entered, key="password")
+    if st.session_state.get("password_correct") is False:
+        st.error("Contraseña incorrecta.")
+    return False
+
+
 def limpiar_precio(s):
     s = s.replace(".", "").replace(",", ".")
     try:
@@ -112,6 +131,9 @@ def analizar_url(url, etiqueta_manual=None):
 
 # ---------- Interfaz ----------
 st.set_page_config(page_title="Comparar precios competencia · Kbas Office", page_icon="⚖️", layout="wide")
+
+if not check_password():
+    st.stop()
 
 st.title("Comparar precios de la competencia")
 st.caption(
